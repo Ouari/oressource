@@ -55,7 +55,7 @@ function new_state() {
 function new_numpad() {
   return {
     prix: 0,
-    quantite: 0,
+    quantite: 1,
     masse: 0.0
   };
 }
@@ -92,10 +92,6 @@ function render_numpad({ prix, quantite, masse }) {
   }
 }
 
-function reset_rendu() {
-  rendu = new_rendu();
-  update_rendu();
-}
 
 function reset_numpad() {
   numpad = new_numpad();
@@ -126,9 +122,21 @@ function get_numpad() {
 
 /// Ajoute au panier l'objet selectionné.
 function update_state({ type, objet = { prix: 0, masse: 0.0 } }) {
-  numpad.prix = objet.prix;
-  numpad.quantite = 1;
-  numpad.masse = objet.masse || 0.0;
+  if( document.getElementById('prix').value == 0){
+    numpad.prix = objet.prix;
+  }else{
+    numpad.prix = document.getElementById('prix').value;
+  }
+  if( document.getElementById('quantite').value == 0){
+    numpad.quantite = 1;
+  }else{
+    numpad.quantite = document.getElementById('quantite').value;
+  }
+  if( document.getElementById('masse').value == 0){
+    numpad.masse = objet.masse || 0.0;
+  }else{
+    numpad.masse = document.getElementById('masse').value;
+  }
   state.last = { type, objet };
   const color = objet.couleur || type.couleur;
   const name = objet.nom || type.nom;
@@ -137,14 +145,17 @@ function update_state({ type, objet = { prix: 0, masse: 0.0 } }) {
   render_numpad(numpad);
 }
 
-/// Effectue le reset des données représentant une vente et de l'interface graphique.
+// Effectue le reset des données représentant une vente et de l'interface graphique.
 function reset(data, response) {
   state = new_state();
 
   reset_numpad();
-  reset_rendu();
   reset_paiement();
-
+// On met le champ réglement à 0 et on execute la fonction de mise à jour
+  document.getElementById('reglement').value = 0;
+  update_rendu();
+// On efface le champ commentaire
+  document.getElementById('commentaire').value = "";
   // On remet à zéro le panier
   {
     const range = document.createRange();
@@ -156,8 +167,6 @@ function reset(data, response) {
   // On donne le nouveau numéro «prévisionnel» à la futur vente.
   // Attention ce numéro est «provisoire» si il y a plusieurs caisses.
   document.getElementById('num_vente').textContent = response.id + 1;
-  // #FIX: 384 Reset du commentaire associé à la vente.
-  document.getElementById('commentaire').value = '';
 }
 
 function moyens(moyen) {
@@ -166,6 +175,7 @@ function moyens(moyen) {
 
 function encaisse_vente() {
   if (state.ticket.size > 0) {
+    const url = '../api/ventes.php';
     const date = document.getElementById('date');
     const data = {
       classe: 'ventes',
