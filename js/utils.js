@@ -555,30 +555,78 @@ function showTicket(data, types, unit='kg') {
  * @globals window.OressourceEnv.adresse
  */
 function impression_ticket(data, response, unit='kg', tvaStuff=() => '', sumFunc=sumMasseTickets) {
-  const title = classeToName(data.classe);
+	const title = classeToName(data.classe);
+	var mp= state.moyen-1;
+	var now= new Date();
+	d = now.getDate();
+	if(d<10){
+		d = "0"+d;
+	};
+	mois = (now.getMonth()+1);
+	if(mois<10){
+		mois = "0"+mois;
+	};
+	y = now.getFullYear();
+        h = now.getHours();
+        if(h<10){
+	       	h = "0"+h;
+       	};
+        m = now.getMinutes();
+	if(m<10){
+		m = "0"+m;
+	};
+	s = now.getSeconds();
+        if(s<10){
+		s = "0"+s;
+	};
+	var Comm = document.getElementById('commentaire').value.trim();
+	if(document.getElementById('commentaire').value.trim()!=''){
+		Comm = dashBreak+"<p> Commentaire : "+Comm;
+	}
+// detail est le détail des objets de la facture
+  var detail =  `${dashBreak}<p>Détails : </p><table>`;
+  var masseT = 0;
+  var prixT = 0;
+  var qttT = 0;
+  //${showTicket(data.items, window.OressourceEnv.types_dechet, unit)}`;
+  for(var i=0;i< data.items.length;i++) {
+    detail = detail+"<tr><td>"+data.items[i].quantite;
+    detail = detail+" x </td><td>"+data.items[i].name;
+    detail = detail+"</td><td>"+data.items[i].masse*data.items[i].quantite;
+    detail = detail+" kg</td><td>"+data.items[i].prix*data.items[i].quantite+" €</td></tr>";
+    masseT = masseT + data.items[i].masse*data.items[i].quantite;
+    prixT = prixT + data.items[i].prix*data.items[i].quantite;
+    qttT = qttT + data.items[i].quantite;
+  }
+  detail = detail+"<tr><td></td><td> Nbr articles : </td><td>"+qttT+" </td><td></td></tr>";
+  detail = detail+"<tr><td></td><td> Qtt déchets évités : </td><td>"+masseT+" Kg </td><td></td></tr>";
+  detail = detail+"<tr><td></td><td>Total : </td><td>"+prixT+" €</td><td></td></tr></table>";
   // Hack affreux pour gérer les ventes car on utilise pas un objet si global dans leur gestion.
-  const html = `
-    <head>
-    <meta charset="utf-8">
-    <title>Ticket ${title} &#x2116;${response.id}</title>
-      <style>
+const html = `
+<head>
+	<meta charset="utf-8">
+	<title>
+		${classeToName(data.classe)} &#x2116;${response.id} -
+		${d+"/"+mois+"/"+y+" - "+h+":"+m+":"+s}
+	</title>
+	<style>
         size: 21cm 29.7cm;
         margin: 30mm 45mm 30mm 45mm;
         p {
-          font-size: 8px;
+          font-size: 1px;
         }
       </style>
     </head>
     <body>
-      <p>${document.querySelector('h1').innerHTML}</p>
-      <p>${window.OressourceEnv.structure}</p>
-      <p>${window.OressourceEnv.adresse}</p>
-      ${tvaStuff()}
-      ${dashBreak}
-      <p>Type: ${classeToName(data.classe)} &#x2116;${response.id}</p>
-      <p>Total: ${sumFunc(window.OressourceEnv.tickets)} ${unit}</p>
-      ${showTickets(data, unit)}
-    </body>
+	<p>${window.OressourceEnv.structure}</p>
+	<p>${window.OressourceEnv.point.nom}</p>
+	<p>${window.OressourceEnv.point.adresse}</p>
+	${tvaStuff()}
+	${detail}
+	<p>Total : ${sumFunc(window.OressourceEnv.tickets)} ${unit}</p>
+	<p>Mode de reglement : ${window.OressourceEnv.moyens_paiement[mp].nom}</p>
+	${Comm}
+	</body>
   </html>`;
 
   function closePrint () {
