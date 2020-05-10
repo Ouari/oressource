@@ -1,5 +1,4 @@
 <?php
-
 /*
   Oressource
   Copyright (C) 2014-2017  Martin Vert and Oressource devellopers
@@ -81,7 +80,7 @@ function insert_pesee_sortie(PDO $bdd, int $id_sortie, array $sortie, array $ite
   }
 }
 
-function specialise_sortie(PDOStatement $stmt, array $sortie): PDOStatement {
+function specialise_sortie(PDOStatement $stmt, $sortie) {
   $classe = $sortie['classe'];
   // Sorties Dons
   if ($classe === 'sorties') {
@@ -142,7 +141,7 @@ function insert_sortie(PDO $bdd, array $sortie): int {
 
   $req = specialise_sortie($req, $sortie);
   $req->execute();
-  return (int) $bdd->lastInsertId();
+  return $bdd->lastInsertId();
 }
 
 session_start();
@@ -182,7 +181,7 @@ if (is_valid_session()) {
     $bdd->beginTransaction();
     $id_sortie = (int) insert_sortie($bdd, $sortie);
     $requete_OK = false;
-    if (count($json['items'] ?? 0) > 0) {
+    if (count($json['evacs'] ?? 0) > 0) {
       if ($sortie['classe'] === 'sorties' || $sortie['classe'] === 'sortiesc') {
         insert_pesee_sortie($bdd, $id_sortie, $sortie, $json['items'], 'id_type_dechet');
         $requete_OK = true;
