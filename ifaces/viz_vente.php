@@ -42,7 +42,7 @@ if (is_valid_session() && is_allowed_vente() && $_SESSION['viz_caisse']) {
   WHERE
   vendus.id_vente = :id_vente
   AND type_dechets.id = vendus.id_type_dechet
-  AND (grille_objets.id = vendus.id_objet OR vendus.id_objet = 0)
+  AND (grille_objets.id = vendus.id_objet OR vendus.id_objet is null)
   GROUP BY vendus.id ');
   $req->execute(['id_vente' => $_GET['nvente']]);
   $donnees = $req->fetchAll(PDO::FETCH_ASSOC);
