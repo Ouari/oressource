@@ -75,10 +75,13 @@ function vendus_insert(PDO $bdd, int $id_vente, array $vente): int {
     }
   }
   $req->closeCursor();
-  return (int) $bdd->lastInsertId();
+  return $bdd->lastInsertId();
 }
 
 function pesee_vendu_insert(PDO $bdd, int $id_vendus, array $vente): int {
+  //$id_vendus est la dernière id utilisée dans l'insertion de la table vendus
+  //le premier $id a utiliser est le dernier $id_vendu moins le nombre d'enregistrement contenu dans $vente['items']
+  $id = $id_vendus - count($vente['items']) + 1;
   $sql = 'INSERT INTO pesees_vendus (
       timestamp,
       last_hero_timestamp,
@@ -98,16 +101,19 @@ function pesee_vendu_insert(PDO $bdd, int $id_vendus, array $vente): int {
   $req = $bdd->prepare($sql);
   $req->bindValue(':timestamp', $vente['date']->format('Y-m-d H:i:s'), PDO::PARAM_STR);
   $req->bindValue(':timestamp1', $vente['date']->format('Y-m-d H:i:s'), PDO::PARAM_STR);
-  $req->bindValue(':id_vendu', $id_vendus, PDO::PARAM_INT);
   $req->bindValue(':id_createur', $vente['id_user'], PDO::PARAM_INT);
   $req->bindValue(':id_createur1', $vente['id_user'], PDO::PARAM_INT);
+  $i = 0;
   foreach ($vente['items'] as $vendu) {
     $masse = parseFloat($vendu['masse']);
     $quantite = parseInt($vendu['quantite']);
+    $id = $id+$i;
     if ($masse > 0.000 && $quantite > 0) {
-      $req->bindValue(':masse', $masse);
+      $req->bindValue(':masse', $masse); 
       $req->bindValue(':quantite', $quantite, PDO::PARAM_INT);
+      $req->bindValue(':id_vendu', $id, PDO::PARAM_INT);
       $req->execute();
+      $i = $i + 1;
     } elseif ($masse < 0.000 && $quantite === 0) {
       $req->closeCursor();
       throw new UnexpectedValueException('masse < 0.00 ou type item inconnu');
@@ -165,7 +171,7 @@ if (is_valid_session()) {
     $json['date'] = allowDate($json) ? parseDate($json['date']) : new DateTime('now');
   } catch (UnexpectedValueException $ex) {
     http_response_code(400); // Bad Request
-    echo(json_encode(['error' => $ex->getMessage()]));
+    echo(json_encode(['error' => $e->getMessage()]));
     die();
   }
 
