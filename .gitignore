@@ -7,3 +7,6 @@ _build
 moteur/dbconfig\.php\.example
 *~
 .*~
+api/ventes - Dev - 20200503.php
+api/ventes - Prod.php
+oressource-master.zip
