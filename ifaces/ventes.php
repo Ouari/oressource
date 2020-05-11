@@ -255,7 +255,7 @@ if (is_valid_session() && is_allowed_vente_id($numero)) {
 
     <?php if ($_SESSION['viz_caisse']) { ?>
       <div id="visualisation" class="col-md-2 col-md-offset-2" style="width: 330px;">
-        <a href="viz_caisse.php?numero=<?= $numero; ?>"
+        <a href="viz_caisse.php?numero=<?= $numero; ?>&suivantes=0"
            target="_blank">Visualiser les <?= $_SESSION['nb_viz_caisse']; ?> dernieres ventes</a>
       </div>
     <?php } ?>
