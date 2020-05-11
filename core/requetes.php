@@ -598,8 +598,11 @@ function nb_remboursements(PDO $bdd, string $start, string $stop,
   return $result;
 }
 
-function viz_caisse(PDO $bdd, int $id_point_vente, int $offset): array {
-  $sql = "SELECT
+function viz_caisse(PDO $bdd, int $id_point_vente, int $offset, int $suivantes): array {
+  $borneinf=$suivantes*$offset;
+  $bornesup=($suivantes+1)*$offset;
+  $sql = "
+  SELECT
     ventes.id as id,
     ventes.timestamp as date_creation,
     moyens_paiement.nom as moyen,
@@ -610,23 +613,22 @@ function viz_caisse(PDO $bdd, int $id_point_vente, int $offset): array {
     SUM(" . vendus_case_lot_unit(). ") as credit,
     SUM(vendus.remboursement * vendus.quantite) as debit,
     SUM(vendus.quantite) as quantite
-  from ventes
-  inner join vendus
-    on vendus.id_vente = ventes.id
-    and DATE(ventes.timestamp) = DATE(NOW())
-    and ventes.id_point_vente = :id_point_vente
-  inner join moyens_paiement
-    on ventes.id_moyen_paiement = moyens_paiement.id
-  inner join utilisateurs
-    on utilisateurs.id = ventes.id_createur
-  group by ventes.id, ventes.timestamp, moyens_paiement.nom,
+FROM ventes, vendus, utilisateurs, moyens_paiement
+WHERE vendus.id_vente = ventes.id
+    AND vendus.id_vente = ventes.id
+    AND ventes.id_point_vente = :id_point_vente
+	AND ventes.id_moyen_paiement = moyens_paiement.id
+--    AND DATE(ventes.timestamp) = DATE(NOW())
+	AND utilisateurs.id = ventes.id_createur
+GROUP BY ventes.id, ventes.timestamp, moyens_paiement.nom,
     moyens_paiement.couleur, ventes.commentaire,
     ventes.last_hero_timestamp, utilisateurs.mail
-  order by ventes.timestamp desc
-  limit 0, :offset";
+order by ventes.timestamp desc
+  limit :borneinf, :bornesup";
   $reqVentes = $bdd->prepare($sql);
   $reqVentes->bindValue('id_point_vente', $id_point_vente, PDO::PARAM_INT);
-  $reqVentes->bindValue('offset', $offset, PDO::PARAM_INT);
+  $reqVentes->bindValue('borneinf', $borneinf, PDO::PARAM_INT);
+  $reqVentes->bindValue('bornesup', $bornesup, PDO::PARAM_INT);
   $reqVentes->execute();
   $resultat = $reqVentes->fetchAll(PDO::FETCH_ASSOC);
   $reqVentes->closeCursor();
