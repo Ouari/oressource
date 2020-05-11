@@ -23,7 +23,7 @@ require_once '../core/session.php';
 require_once '../core/requetes.php';
 
 $numero = filter_input(INPUT_GET, 'numero', FILTER_VALIDATE_INT);
-
+$suivantes = filter_input(INPUT_GET, 'suivantes', FILTER_VALIDATE_INT);
 if (is_valid_session() && $_SESSION['viz_caisse'] && is_allowed_vente_id($numero)) {
   require_once 'tete.php';
 
@@ -31,7 +31,7 @@ if (is_valid_session() && $_SESSION['viz_caisse'] && is_allowed_vente_id($numero
   ?>
 
   <div class="container">
-    <h1>Visualisation des <?= $nb_viz_caisse; ?> derniere ventes</h1>
+    <h1>Visualisation des <?= $nb_viz_caisse;?> derniere ventes</h1>
     <p align="right">
       <input class="btn btn-default btn-lg" type='button'name='quitter' value='Quitter' OnClick="window.close();"/></p>
     <div class="panel-body">
@@ -54,7 +54,7 @@ if (is_valid_session() && $_SESSION['viz_caisse'] && is_allowed_vente_id($numero
       </thead>
 
       <tbody>
-        <?php foreach (viz_caisse($bdd, $numero, $nb_viz_caisse) as $vente) { ?>
+        <?php foreach (viz_caisse($bdd, $numero, $nb_viz_caisse, $suivantes) as $vente) { ?>
           <tr>
             <td><?= $vente['id']; ?></td>
             <td><?= $vente['date_creation']; ?></td>
@@ -84,6 +84,12 @@ if (is_valid_session() && $_SESSION['viz_caisse'] && is_allowed_vente_id($numero
         <?php } ?>
       </tbody>
     </table>
+    <div id="visualisation">
+      <?php if ($suivantes>0) {?>
+        <a href="viz_caisse.php?numero=1&suivantes=<?php echo($suivantes-1);?>" class="btn btn-default btn-lg" align="left">Visualiser les 30 ventes précédentes</a>
+      <?php }?>
+      <a href="viz_caisse.php?numero=1&suivantes=<?php echo($suivantes+1);?>" class="btn btn-default btn-lg" align="right">Visualiser les 30 ventes suivantes</a>
+    </div>      
   </div><!-- /.container -->
   <?php
   require_once 'pied.php';
