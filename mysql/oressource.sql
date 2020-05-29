@@ -366,39 +366,6 @@ LOCK TABLES `pesees_sorties` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `pesees_vendus`
---
-
-DROP TABLE IF EXISTS `pesees_vendus`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pesees_vendus` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `masse` decimal(11,3) NOT NULL,
-  `quantite` int(11) NOT NULL,
-  `id_createur` int(11) NOT NULL DEFAULT '0',
-  `id_last_hero` int(11) NOT NULL DEFAULT '0',
-  `last_hero_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `FK_PeseesVendus_Createur` (`id_createur`),
-  KEY `FK_PeseesVendus_Editeur` (`id_last_hero`),
-  CONSTRAINT `FK_PeseesVendus_Createur` FOREIGN KEY (`id_createur`) REFERENCES `utilisateurs` (`id`),
-  CONSTRAINT `FK_PeseesVendus_Editeur` FOREIGN KEY (`id_last_hero`) REFERENCES `utilisateurs` (`id`),
-  CONSTRAINT `FK_PeseesVendus_Vendus` FOREIGN KEY (`id`) REFERENCES `vendus` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `pesees_vendus`
---
-
-LOCK TABLES `pesees_vendus` WRITE;
-/*!40000 ALTER TABLE `pesees_vendus` DISABLE KEYS */;
-/*!40000 ALTER TABLE `pesees_vendus` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `points_collecte`
 --
 

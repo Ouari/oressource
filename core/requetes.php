@@ -500,14 +500,12 @@ function vendu_by_id_vente(PDO $bdd, int $id_vente): array {
     vendus.last_hero_timestamp,
     type_dechets.nom type,
     CASE WHEN vendus.id_objet > 0 THEN grille_objets.nom ELSE "autre" END objet,
-    pesees_vendus.masse
+    vendus.masse
   FROM vendus
   INNER JOIN type_dechets
   ON type_dechets.id = vendus.id_type_dechet
   left JOIN grille_objets
   ON grille_objets.id = vendus.id_objet
-  LEFT JOIN pesees_vendus
-  ON pesees_vendus.id = vendus.id_vente
   WHERE vendus.id_vente = :id_vente');
   $req->bindParam(':id_vente', $id_vente, PDO::PARAM_INT);
   $req->execute();
@@ -677,19 +675,17 @@ function bilan_ventes_pesees(PDO $bdd, string $start, string $stop,
       type_dechets.id as id,
       type_dechets.nom as nom,
       type_dechets.couleur as couleur,
-      COUNT(DISTINCT(pesees_vendus.id)) as nb_pesees_ventes,
-      COALESCE(SUM(pesees_vendus.quantite), 0) as quantite_pesee_vendu,
-      COALESCE(SUM(pesees_vendus.masse), 0) as vendu_masse,
-      COALESCE(AVG(pesees_vendus.masse), 0) as moy_masse_vente
-    FROM pesees_vendus
-    INNER JOIN vendus
-    ON vendus.id = pesees_vendus.id
+      COUNT(DISTINCT(vendus.id)) as nb_pesees_ventes,
+      COALESCE(SUM(vendus.quantite), 0) as quantite_pesee_vendu,
+      COALESCE(SUM(vendus.masse), 0) as vendu_masse,
+      COALESCE(AVG(vendus.masse), 0) as moy_masse_vente
+    FROM vendus
     INNER JOIN type_dechets
     ON vendus.id_type_dechet = type_dechets.id
     INNER JOIN ventes
     ON vendus.id_vente = ventes.id
       $cond
-    WHERE DATE(pesees_vendus.timestamp)
+    WHERE DATE(vendus.timestamp)
     BETWEEN :du AND :au
     GROUP BY type_dechets.id, type_dechets.nom, type_dechets.couleur";
   $stmt = $bdd->prepare($sql);
@@ -715,12 +711,10 @@ function bilan_ventes(PDO $bdd, string $start, string $stop,
     SUM(vendus.quantite) as vendu_quantite,
     SUM(vendus.remboursement) as remb_somme,
     SUM(case when vendus.remboursement > 0 then 1 else 0 end) as remb_quantite,
-    COALESCE(SUM(pesees_vendus.masse), 0) as vendu_masse
+    COALESCE(SUM(vendus.masse), 0) as vendu_masse
   FROM ventes
   INNER JOIN vendus
   ON vendus.id_vente = ventes.id
-  LEFT JOIN pesees_vendus
-  ON vendus.id = pesees_vendus.id
   WHERE DATE(ventes.timestamp) BETWEEN :du AND :au $cond";
   $stmt = $bdd->prepare($sql);
   $stmt->bindValue(':du', $start, PDO::PARAM_STR);

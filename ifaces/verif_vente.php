@@ -48,14 +48,12 @@ if (is_valid_session() && is_allowed_verifications()) {
     SUM(' . vendus_case_lot_unit(). ') vente,
     SUM(vendus.quantite) quantite,
     SUM(vendus.remboursement * vendus.quantite) remb,
-    SUM(pesees_vendus.masse) masse
+    SUM(vendus.masse) masse
   FROM ventes
   INNER JOIN moyens_paiement
   ON ventes.id_moyen_paiement = moyens_paiement.id
   INNER JOIN vendus
   ON vendus.id_vente = ventes.id
-  LEFT JOIN pesees_vendus
-  ON pesees_vendus.id = vendus.id
   WHERE ventes.id_point_vente = :id_point_vente
   AND DATE(ventes.timestamp) BETWEEN :du AND :au
   GROUP BY ventes.id,

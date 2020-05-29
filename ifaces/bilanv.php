@@ -276,7 +276,12 @@ if (is_valid_session() && is_allowed_bilan()) {
                       <td><?= $Notpe; ?></td>
                       <td><?= $obj_vendu; ?></td>
                       <td><?= round($prix_tonne_estime, 2); ?></td>
-                      <td><?= round(($chiffre_degage / $prix_tonne_estime) * 1000, 2); ?></td>
+                      <td><?php
+                      if ($prix_tonne_estime != 0) { ?>
+                          <?= round(($chiffre_degage / $prix_tonne_estime) * 1000, 2); ?>
+                          <?php } else {?>
+                          <?=  "N/A";?>
+                          <?php } ?></td>
                       <td>
                         <span class='badge'
                               id='Bcertitude'

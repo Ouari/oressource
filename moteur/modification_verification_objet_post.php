@@ -25,8 +25,9 @@ if (isset($_SESSION['id']) && $_SESSION['systeme'] === 'oressource' && (strpos($
     prix = :prix,
     quantite = :quantite,
     id_last_hero = :id_last_hero
+    masse = :masse
     WHERE id = :id');
-  $req->execute(['prix' => $_POST['prix'], 'quantite' => $_POST['quantite'], 'id' => $_POST['id'], 'id_last_hero' => $_SESSION['id']]);
+  $req->execute(['prix' => $_POST['prix'], 'quantite' => $_POST['quantite'], 'id' => $_POST['id'], 'id_last_hero' => $_SESSION['id'],'masse' => $_POST['masse']]);
   $req->closeCursor();
 
   $req = $bdd->prepare('UPDATE ventes SET
@@ -35,17 +36,6 @@ if (isset($_SESSION['id']) && $_SESSION['systeme'] === 'oressource' && (strpos($
   $req->execute(['id' => $_POST['nvente'], 'id_last_hero' => $_SESSION['id']]);
   $req->closeCursor();
 
-  if (isset($_POST['masse'])) {
-    $req = $bdd->prepare('UPDATE pesees_vendus SET
-      id_last_hero = :id_last_hero,
-      masse = :masse
-      WHERE id = :id');
-    $req->bindParam(':id', $_POST['id'], PDO::PARAM_INT);
-    $req->bindParam(':id_last_hero', $_SESSION['id'], PDO::PARAM_INT);
-    $req->bindParam(':masse', $_POST['masse'], PDO::PARAM_STR);
-    $req->execute();
-    $req->closeCursor();
-  }
   header('Location:../ifaces/verif_vente.php?numero=' . $_POST['npoint'] . '&date1=' . $_POST['date1'] . '&date2=' . $_POST['date2']);
 } else {
   header('Location:../moteur/destroy.php');
