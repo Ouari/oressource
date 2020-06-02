@@ -86,9 +86,9 @@ if (is_valid_session() && $_SESSION['viz_caisse'] && is_allowed_vente_id($numero
     </table>
     <div id="visualisation">
       <?php if ($suivantes>0) {?>
-        <a href="viz_caisse.php?numero=1&suivantes=<?php echo($suivantes-1);?>" class="btn btn-default btn-lg" align="left">Visualiser les 30 ventes précédentes</a>
+        <a href="viz_caisse.php?numero=<?php echo($numero);?>&suivantes=<?php echo($suivantes-1);?>" class="btn btn-default btn-lg" align="left">Visualiser les 30 ventes précédentes</a>
       <?php }?>
-      <a href="viz_caisse.php?numero=1&suivantes=<?php echo($suivantes+1);?>" class="btn btn-default btn-lg" align="right">Visualiser les 30 ventes suivantes</a>
+      <a href="viz_caisse.php?numero=<?php echo($numero);?>&suivantes=<?php echo($suivantes+1);?>" class="btn btn-default btn-lg" align="right">Visualiser les 30 ventes suivantes</a>
     </div>      
   </div><!-- /.container -->
   <?php
