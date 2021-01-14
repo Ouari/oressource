@@ -938,8 +938,10 @@
             monthHtml += "</select>";
 
             var currentYear = selected.year();
-            var maxYear = (maxDate && maxDate.year()) || (currentYear + 5);
-            var minYear = (minDate && minDate.year()) || (currentYear - 50);
+//            var maxYear = (maxDate && maxDate.year()) || (currentYear + 5);
+//            var minYear = (minDate && minDate.year()) || (currentYear - 5);
+            var maxYear =  (currentYear + 5);
+            var minYear =  (currentYear - 5);
             var yearHtml = '<select class="yearselect">';
 
             for (var y = minYear; y <= maxYear; y++) {
@@ -1010,7 +1012,7 @@
                     cname += (calendar[row][col].month() == calendar[1][1].month()) ? '' : 'off';
 
                     if ((minDate && calendar[row][col].isBefore(minDate, 'day')) || (maxDate && calendar[row][col].isAfter(maxDate, 'day'))) {
-                        cname = ' off disabled ';
+//                        cname = ' off disabled ';
                     } else if (calendar[row][col].format('YYYY-MM-DD') == selected.format('YYYY-MM-DD')) {
                         cname += ' active ';
                         if (calendar[row][col].format('YYYY-MM-DD') == this.startDate.format('YYYY-MM-DD')) {
