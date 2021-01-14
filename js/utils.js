@@ -69,7 +69,7 @@ function set_datepicker(data) {
         moment().startOf('month'),
         moment().endOf('month')
       ],
-      'Le mois deriner': [
+      'Le mois dernier': [
         moment().subtract(1, 'month').startOf('month'),
         moment().subtract(1, 'month').endOf('month')
       ]
@@ -429,6 +429,7 @@ function post_data(url, getData, onFinalise, onImpress = (_, a) => a) {
           }
         });
     }
+  document.getElementById('impression').disabled = false;
   };
 }
 
@@ -495,7 +496,7 @@ function prepare_data(tickets, metadata) {
  * Code de gestion de l'impression
  */
 
-const dashBreak = '<p>--------------------------------------------------------------------------------</p>';
+const dashBreak = '------------------<br/>';
 
 /*
  * Fonction qui permet d'afficher les différents types de Tickets dans le cas des pesées qui
@@ -525,7 +526,6 @@ function showTickets(data, unit='kg') {
  * @param unit  {string} - unité pour les entrées du ticket
  */
 function showTicket(data, types, unit='kg') {
-  // Hack on ajoute les noms a la volées pour les sorties/collectes.
   const new_data = data.map((item) => {
     if (item.hasOwnProperty('name')) {
       return item
@@ -534,8 +534,6 @@ function showTicket(data, types, unit='kg') {
       return { ...item, name };
     }
   });
-
-  // Encore un hack pour gérer ventes et collectes/pesees.
   const accu = unit === 'kg' ? (a, {masse}) => a + masse : (a, {prix}) => a + prix;
   const sum = new_data.reduce(accu, 0.0);
   return [ `Sous total: ${sum} ${unit}${dashBreak}`,
@@ -555,40 +553,13 @@ function showTicket(data, types, unit='kg') {
  * @globals window.OressourceEnv.adresse
  */
 function impression_ticket(data, response, unit='kg', tvaStuff=() => '', sumFunc=sumMasseTickets) {
-	const title = classeToName(data.classe);
-	var mp= state.moyen-1;
-	var now= new Date();
-	d = now.getDate();
-	if(d<10){
-		d = "0"+d;
-	};
-	mois = (now.getMonth()+1);
-	if(mois<10){
-		mois = "0"+mois;
-	};
-	y = now.getFullYear();
-        h = now.getHours();
-        if(h<10){
-	       	h = "0"+h;
-       	};
-        m = now.getMinutes();
-	if(m<10){
-		m = "0"+m;
-	};
-	s = now.getSeconds();
-        if(s<10){
-		s = "0"+s;
-	};
-	var Comm = document.getElementById('commentaire').value.trim();
-	if(document.getElementById('commentaire').value.trim()!=''){
-		Comm = dashBreak+"<p> Commentaire : "+Comm;
-	}
-// detail est le détail des objets de la facture
-  var detail =  `${dashBreak}<p>Détails : </p><table>`;
+  const title = classeToName(data.classe);
+  var mp= state.moyen-1;
+  var Comm = document.getElementById('commentaire').value.trim();
+  var detail =  `${dashBreak}Détails : <br><table>`;
   var masseT = 0;
   var prixT = 0;
   var qttT = 0;
-  //${showTicket(data.items, window.OressourceEnv.types_dechet, unit)}`;
   for(var i=0;i< data.items.length;i++) {
     detail = detail+"<tr><td>"+data.items[i].quantite;
     detail = detail+" x </td><td>"+data.items[i].name;
@@ -598,41 +569,41 @@ function impression_ticket(data, response, unit='kg', tvaStuff=() => '', sumFunc
     prixT = prixT + data.items[i].prix*data.items[i].quantite;
     qttT = qttT + data.items[i].quantite;
   }
-  detail = detail+"<tr><td></td><td> Nbr articles : </td><td>"+qttT+" </td><td></td></tr>";
-  detail = detail+"<tr><td></td><td> Qtt déchets évités : </td><td>"+masseT+" Kg </td><td></td></tr>";
-  detail = detail+"<tr><td></td><td>Total : </td><td>"+prixT+" €</td><td></td></tr></table>";
-  // Hack affreux pour gérer les ventes car on utilise pas un objet si global dans leur gestion.
-const html = `
-<head>
-	<meta charset="utf-8">
-	<title>
-		${classeToName(data.classe)} &#x2116;${response.id} -
-		${d+"/"+mois+"/"+y+" - "+h+":"+m+":"+s}
-	</title>
-	<style>
-        size: 21cm 29.7cm;
-        margin: 30mm 45mm 30mm 45mm;
-        p {
-          font-size: 1px;
-        }
+  detail = detail+"</td></tr></table>";  
+  const html = `
+    <head>
+    <meta charset="utf-8">
+    <title>${title} &#x2116;${response.id}</title>
+      <style>
+        margin: 5mm 5mm 5mm 5mm;
       </style>
     </head>
     <body>
-	<p>${window.OressourceEnv.structure}</p>
-	<p>${window.OressourceEnv.point.nom}</p>
-	<p>${window.OressourceEnv.point.adresse}</p>
-	${tvaStuff()}
-	${detail}
-	<p>Total : ${sumFunc(window.OressourceEnv.tickets)} ${unit}</p>
-	<p>Mode de reglement : ${window.OressourceEnv.moyens_paiement[mp].nom}</p>
-	${Comm}
-	</body>
-  </html>`;
-
+      <FONT size="2pt">
+        <img src="http://recyclabulle.net/wp-content/uploads/2020/05/cropped-339969_227652920658643_487584277_o-1.jpg"
+        width="60">
+        ${window.OressourceEnv.structure}<br/>
+        ${window.OressourceEnv.point.nom}<br/>
+        ${window.OressourceEnv.point.adresse}<br/>
+        <FONT size="1pt">
+        ${detail}
+        </FONT>
+        <FONT size="2pt">
+        ${dashBreak}
+        <table width=100%>
+          <tr><td> Nbr articles : </td><td align='right'>${qttT} </td></tr>
+          <tr><td> Qtt déchets : </td><td align='right'>${masseT} Kg </td></tr>
+          <tr><td> Total : </td><td align='right'>${prixT} €</td></tr>
+        </table>
+        ${dashBreak}
+        Mode de reglement : ${window.OressourceEnv.moyens_paiement[mp].nom}</p>
+        ${Comm}
+       </FONT>
+    </body>
+  </html>`;  
   function closePrint () {
     document.body.removeChild(this.__container__);
   }
-
   function setPrint() {
       this.contentWindow.__container__ = this;
       this.contentWindow.onbeforeunload = closePrint;
@@ -640,14 +611,13 @@ const html = `
       this.contentWindow.focus();
       this.contentWindow.print();
   }
-
   const iframe = document.createElement('iframe');
   iframe.onload = setPrint;
   iframe.style.visibility = 'hidden';
   iframe.style.position = 'fixed';
-  iframe.style.right = 0;
-  iframe.style.bottom = 0;
-  iframe.src = 'about:blank';
+  iframe.style.left = '0';
+  iframe.style.top = '0';
+  iframe.src = 'about:scrdoc';
   iframe.srcdoc = html;
   document.body.appendChild(iframe);
   return response;
